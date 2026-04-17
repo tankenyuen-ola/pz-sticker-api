@@ -52,7 +52,7 @@ python -m app.main
 | `OSS_ACCESS_KEY_SECRET` | 是 | - | 阿里云 OSS AccessKey Secret |
 | `OSS_ENDPOINT` | 否 | `oss-ap-southeast-1.aliyuncs.com` | OSS Endpoint |
 | `OSS_BUCKET_NAME` | 否 | `recommend-sg` | OSS Bucket 名称 |
-| `OSS_SIGNED_URL_EXPIRES` | 否 | `3600` | 签名 URL 有效期（秒） |
+| `OSS_SIGNED_URL_EXPIRES` | 否 | `3600` | 签名 URL 有效期（秒），默认 1 小时，可按需调整（如 `86400` = 24 小时） |
 | `APP_ENV` | 否 | `development` | 运行环境：development / production |
 | `APP_PORT` | 否 | `8188` | 服务端口 |
 | `DEBUG_MODE` | 否 | `false` | 调试模式（开启后可访问 /docs） |
@@ -64,7 +64,7 @@ python -m app.main
 ### 1. 提交生成请求
 
 ```
-POST /api/ai_emoji/generate
+POST /api/ai_emoji/v1/generate
 Content-Type: application/json
 ```
 
@@ -79,7 +79,7 @@ Content-Type: application/json
 **请求示例：**
 
 ```bash
-curl -X POST http://localhost:8188/api/ai_emoji/generate \
+curl -X POST http://localhost:8188/api/ai_emoji/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
     "imageUrl": "https://example.com/photo.jpg",
@@ -197,10 +197,4 @@ GET /health
 
 ## 处理流程
 
-```
-用户照片 → Gemini 人脸审核 → 生成 Webtoon 参考图
-    → 生成 3 张 4 贴纸表（共 12 个）
-    → 背景移除（ffmpeg）→ 智能裁剪（512x512）
-    → PNG→WebP 转换 → 上传 OSS → 回调返回 CDN URL
-    → 清理本地临时文件
-```
+回调返回的图片 URL 为 OSS 签名 URL，默认有效期 1 小时（3600 秒）。可通过环境变量 `OSS_SIGNED_URL_EXPIRES` 自行调整过期时间，以秒为单位（如设为 `86400` 即 24 小时）。过期后链接将无法访问，调用方需在有效期内下载或转存图片。
