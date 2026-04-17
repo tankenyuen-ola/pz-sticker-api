@@ -17,4 +17,4 @@ RUN mkdir -p /app/work_dir
 
 EXPOSE 8188
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8188"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8188}
