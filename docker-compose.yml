@@ -4,8 +4,7 @@ services:
   pz-sticker-api:
     build: .
     container_name: pz-sticker-api
-    ports:
-      - "8188:8188"
+    network_mode: host
     env_file:
       - .env
     volumes:
