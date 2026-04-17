@@ -14,7 +14,7 @@ app = FastAPI(
     docs_url="/docs" if config.debug_mode else None,
 )
 
-app.include_router(api_router, prefix="/api/ai_emoji")
+app.include_router(api_router, prefix="/api/ai_emoji/v1")
 
 
 @app.get("/health")

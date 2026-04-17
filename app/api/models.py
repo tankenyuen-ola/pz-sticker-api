@@ -8,7 +8,7 @@ from typing import List, Optional
 # --- Request ---
 
 class GenerateRequest(BaseModel):
-    """Request body for POST /api/ai_emoji/generate."""
+    """Request body for POST /api/ai_emoji/v1/generate."""
     imageUrl: str = Field(..., description="User photo URL (HTTPS preferred)")
     taskId: str = Field(
         ...,

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json as _json
 from typing import Any
 
 import aiohttp
@@ -60,6 +61,8 @@ async def _attempt_callback(
 
     Returns:
         (success, error_message)
+
+    Success condition: HTTP 2xx AND response body contains {"success": true}.
     """
     timeout = aiohttp.ClientTimeout(total=_PER_ATTEMPT_TIMEOUT)
     try:
@@ -69,14 +72,27 @@ async def _attempt_callback(
                 json=payload_dict,
                 headers={"Content-Type": "application/json"},
             ) as resp:
+                body = await resp.text()
                 if 200 <= resp.status < 300:
-                    logger.info(
-                        "[Callback] Attempt {} succeeded for taskId={} (HTTP {})",
-                        attempt, payload_dict.get("taskId", "?"), resp.status,
-                    )
-                    return True, ""
+                    # Check if response body indicates success
+                    try:
+                        resp_json = _json.loads(body)
+                    except Exception:
+                        resp_json = None
+                    if isinstance(resp_json, dict) and resp_json.get("success") is True:
+                        logger.info(
+                            "[Callback] Attempt {} succeeded for taskId={} (HTTP {})",
+                            attempt, payload_dict.get("taskId", "?"), resp.status,
+                        )
+                        return True, ""
+                    else:
+                        error_msg = f"HTTP {resp.status}: response missing success=true: {body[:200]}"
+                        logger.warning(
+                            "[Callback] Attempt {} failed for taskId={}: {}",
+                            attempt, payload_dict.get("taskId", "?"), error_msg,
+                        )
+                        return False, error_msg
                 else:
-                    body = await resp.text()
                     error_msg = f"HTTP {resp.status}: {body[:200]}"
                     logger.warning(
                         "[Callback] Attempt {} failed for taskId={}: {}",
