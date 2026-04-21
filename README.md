@@ -159,7 +159,13 @@ curl -X POST http://localhost:8188/api/ai_emoji/v1/generate \
 | 1008 | 人脸角度或表情异常 |
 | 9999 | 内部错误 / 超时 |
 
-回调失败时会自动重试（指数退避：2s、4s、8s，共 4 次尝试）。
+**业务方回调响应格式：**
+
+```json
+{"success": true, "msg": "ok"}
+```
+
+仅当响应包含 `"success": true` 时视为回调成功；否则自动重试 3 次（指数退避：2s、4s、8s，共 1+3=4 次尝试）。
 
 ### 3. 健康检查
 
@@ -192,9 +198,38 @@ GET /health
 
 | 环境 | URL |
 |------|-----|
-| 测试 | `https://cai_carbon.aopacloud.sg/api/ai_emoji` |
-| 生产 | `http://cai_carbon.aopacloud.private:8188/api/ai_emoji` |
+| 测试 | `https://cai_carbon.aopacloud.sg/api/ai_emoji/v1` |
+| 生产 | `http://cai_carbon.aopacloud.private:8188/api/ai_emoji/v1` |
 
-## 处理流程
+## 本地调试（DEBUG_MODE=true）
+
+开启 `DEBUG_MODE=true` 后，可使用以下测试端点进行本地调试：
+
+```
+POST /api/ai_emoji/v1/test/callback   — 接收并存储回调结果
+GET  /api/ai_emoji/v1/test/result/{taskId} — 查询回调结果
+```
+
+**本地测试示例：**
+
+```bash
+# 1. 提交生成请求（callbackUrl 指向本地测试端点）
+curl -X POST http://localhost:8188/api/ai_emoji/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "imageUrl": "https://example.com/photo.jpg",
+    "taskId": "test_001",
+    "callbackUrl": "http://localhost:8188/api/ai_emoji/v1/test/callback"
+  }'
+
+# 2. 查询结果（pipeline 约 1-3 分钟，隔一段时间再查）
+curl http://localhost:8188/api/ai_emoji/v1/test/result/test_001
+```
+
+查询结果分两种：
+- **Pipeline 运行中**：`{"taskId": "test_001", "status": "pending", "msg": "result not ready yet"}`
+- **Pipeline 完成**：返回完整的 CallbackPayload（含 errorCode、emojiList 等）
+
+## OSS 签名 URL
 
 回调返回的图片 URL 为 OSS 签名 URL，默认有效期 1 小时（3600 秒）。可通过环境变量 `OSS_SIGNED_URL_EXPIRES` 自行调整过期时间，以秒为单位（如设为 `86400` 即 24 小时）。过期后链接将无法访问，调用方需在有效期内下载或转存图片。
