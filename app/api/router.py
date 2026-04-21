@@ -1,7 +1,8 @@
 """API router for AI Emoji Sticker Generation API."""
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
 from app.api.models import CallbackPayload, GenerateRequest, GenerateResponse
 from app.config import config
@@ -56,9 +57,9 @@ if config.debug_mode:
         return {"success": True, "msg": "ok"}
 
     @api_router.get("/test/result/{task_id}")
-    async def get_test_result(task_id: str) -> Optional[CallbackPayload]:
+    async def get_test_result(task_id: str) -> Any:
         """Poll for callback result by taskId (debug only)."""
         result = _callback_results.get(task_id)
         if result is None:
-            return {"taskId": task_id, "status": "pending", "msg": "result not ready yet"}
+            return JSONResponse(content={"taskId": task_id, "status": "pending", "msg": "result not ready yet"})
         return result

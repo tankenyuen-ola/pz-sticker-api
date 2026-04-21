@@ -12,7 +12,7 @@ from app.logger import setup_logger
 
 logger = setup_logger()
 
-# Retry delays: 2s, 4s, 8s (3 retries after the initial attempt)
+# 3 retries after the initial attempt: 2s, 4s, 8s
 _RETRY_DELAYS = [2, 4, 8]
 _PER_ATTEMPT_TIMEOUT = 10  # seconds
 
@@ -21,10 +21,10 @@ async def send_callback(callback_url: str, payload: CallbackPayload) -> bool:
     """Send callback payload to the callbackUrl with exponential backoff retry.
 
     Total attempts: 1 immediate + 3 retries = 4 attempts.
-    Delays between retries: 2s, 4s, 8s.
+    Only retries when response does not contain {"success": true}.
 
     Returns:
-        True if at least one attempt got a 2xx response, False otherwise.
+        True if at least one attempt succeeded, False otherwise.
     """
     payload_dict = payload.model_dump()
     last_error: str = ""
@@ -34,7 +34,7 @@ async def send_callback(callback_url: str, payload: CallbackPayload) -> bool:
     if success:
         return True
 
-    # Retry up to 3 times with exponential backoff
+    # Retry 3 times with exponential backoff
     for retry_index, delay in enumerate(_RETRY_DELAYS, start=1):
         logger.info(
             "[Callback] Retry {}/3 for taskId={} after {:.0f}s delay",
@@ -46,7 +46,7 @@ async def send_callback(callback_url: str, payload: CallbackPayload) -> bool:
             return True
 
     logger.error(
-        "[Callback] All 4 attempts failed for taskId={} to {}. Last error: {}",
+        "[Callback] All 4 attempts (1 + 3 retries) failed for taskId={} to {}. Last error: {}",
         payload.taskId, callback_url, last_error,
     )
     return False
