@@ -178,7 +178,7 @@ async def _execute_pipeline(task_id: str, image_url: str, callback_url: str) -> 
             errorCode=status_code,
             msg=error_msg,
             data=CallbackData(),
-        ))
+        ), no_retry=True)
         return
 
     logger.info("[Pipeline] Task {}: Review passed", task_id)

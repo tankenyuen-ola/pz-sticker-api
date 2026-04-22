@@ -17,11 +17,12 @@ _RETRY_DELAYS = [2, 4, 8]
 _PER_ATTEMPT_TIMEOUT = 10  # seconds
 
 
-async def send_callback(callback_url: str, payload: CallbackPayload) -> bool:
+async def send_callback(callback_url: str, payload: CallbackPayload, *, no_retry: bool = False) -> bool:
     """Send callback payload to the callbackUrl with exponential backoff retry.
 
     Total attempts: 1 immediate + 3 retries = 4 attempts.
     Only retries when response does not contain {"success": true}.
+    If no_retry=True, only the initial attempt is made (no retries).
 
     Returns:
         True if at least one attempt succeeded, False otherwise.
@@ -33,6 +34,11 @@ async def send_callback(callback_url: str, payload: CallbackPayload) -> bool:
     success, last_error = await _attempt_callback(callback_url, payload_dict, attempt=0)
     if success:
         return True
+
+    # If no_retry, skip all retries after the initial attempt
+    if no_retry:
+        logger.info("[Callback] no_retry=True, skipping retries for taskId={}", payload.taskId)
+        return False
 
     # Retry 3 times with exponential backoff
     for retry_index, delay in enumerate(_RETRY_DELAYS, start=1):
