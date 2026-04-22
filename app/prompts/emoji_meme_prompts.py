@@ -133,10 +133,12 @@ DEFAULT_SHEET_PROMPTS: Sequence[str] = (
 
 [Dynamic Background Selection]: Analyze the colors of the character's clothing, hair, and skin. You MUST automatically set the entire solid background to purely solid {Selected_Color} to guarantee flawless chroma-key cutout. DO NOT mix these colors; the background must be a single solid color.
 
-Top-left (你好): Waving a friendly hand with a joyful cute smile.
-Top-right (鼓掌): Enthusiastically clapping tiny hands with a broad, happy grin.
-Bottom-left (喜欢): Making a heart shape with both hands over the chest with a beaming smile.
-Bottom-right (害羞): Deep wide pink blush covering cheeks, shyly looking downward, bashful smile, tiny hands hovering nervously near cheeks.
+[CRITICAL POSITION RULE]: Each expression MUST appear strictly in its designated quadrant shown below. Swapping, repositioning, or mixing expressions between quadrants is STRICTLY FORBIDDEN.
+
+① Top-left (你好): Waving a friendly hand with a joyful cute smile.
+② Top-right (鼓掌): Enthusiastically clapping tiny hands with a broad, happy grin.
+③ Bottom-left (喜欢): Making a heart shape with both hands over the chest with a beaming smile.
+④ Bottom-right (害羞): Deep wide pink blush covering cheeks, shyly looking downward, bashful smile, tiny hands hovering nervously near cheeks.
 
 {Style_Instructions}""",
     """A high-quality 2D sticker sheet featuring a 2x2 seamless arrangement of 4 different ultra-cute Chibi (Q-version) expressions of the same character. {Identity_Style_Intro}
@@ -149,10 +151,12 @@ Bottom-right (害羞): Deep wide pink blush covering cheeks, shyly looking downw
 
 [Dynamic Background Selection]: Analyze the colors of the character's clothing, hair, and skin. You MUST automatically set the entire solid background to purely solid {Selected_Color} to guarantee flawless chroma-key cutout. DO NOT mix these colors; the background must be a single solid color.
 
-Top-left (呜呜呜): Exaggerated large cartoon waterfall tears weeping down face, sad pouting expression.
-Top-right (生气): Furrowed brow, crossed tiny arms, cartoon steam exhaling from nostrils or temples.
-Bottom-left (色咪咪): Eyes replaced by large red hearts, deep wide pink blush covering cheeks, mouth agape in slack-jawed smile with visible drool droplet hanging from corner. Floating tiny hearts surround head.
-Bottom-right (要抱抱): Stretching both tiny arms wide open forward, pleading puppy-dog expression.
+[CRITICAL POSITION RULE]: Each expression MUST appear strictly in its designated quadrant shown below. Swapping, repositioning, or mixing expressions between quadrants is STRICTLY FORBIDDEN.
+
+① Top-left (呜呜呜): Exaggerated large cartoon waterfall tears weeping down face, sad pouting expression.
+② Top-right (生气): Furrowed brow, crossed tiny arms, cartoon steam exhaling from nostrils or temples.
+③ Bottom-left (色咪咪): Eyes replaced by large red hearts, deep wide pink blush covering cheeks, mouth agape in slack-jawed smile with visible drool droplet hanging from corner. Floating tiny hearts surround head.
+④ Bottom-right (要抱抱): Stretching both tiny arms wide open forward, pleading puppy-dog expression.
 
 {Style_Instructions}""",
     """A high-quality 2D sticker sheet featuring a 2x2 seamless arrangement of 4 different ultra-cute Chibi (Q-version) expressions of the same character. {Identity_Style_Intro}
@@ -165,10 +169,12 @@ Bottom-right (要抱抱): Stretching both tiny arms wide open forward, pleading 
 
 [Dynamic Background Selection]: Analyze the colors of the character's clothing, hair, and skin. You MUST automatically set the entire solid background to purely solid {Selected_Color} to guarantee flawless chroma-key cutout. DO NOT mix these colors; the background must be a single solid color.
 
-Top-left (谢谢老板): Bowing slightly with palms pressed together respectfully and a grateful bright smile.
-Top-right (加油): Pumping one tiny fist in the air in a determined, encouraging stance with a resolute face.
-Bottom-left (飞吻): Blowing a single kiss with one hand on cheek and a playful wink.
-Bottom-right (晚安): Resting head on folded hands like a pillow, closed eyes with a peaceful sleeping expression.
+[CRITICAL POSITION RULE]: Each expression MUST appear strictly in its designated quadrant shown below. Swapping, repositioning, or mixing expressions between quadrants is STRICTLY FORBIDDEN.
+
+① Top-left (谢谢老板): Bowing slightly with palms pressed together respectfully and a grateful bright smile.
+② Top-right (加油): Pumping one tiny fist in the air in a determined, encouraging stance with a resolute face.
+③ Bottom-left (飞吻): Blowing a single kiss with one hand on cheek and a playful wink.
+④ Bottom-right (晚安): Resting head on folded hands like a pillow, closed eyes with a peaceful sleeping expression.
 
 {Style_Instructions}""",
 )
