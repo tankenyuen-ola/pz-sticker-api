@@ -89,6 +89,83 @@ _RESOLUTION = "1K"
 _TEMPERATURE = 0.6
 _TOP_P = 0.95
 
+# Label verification prompt and schema builder
+_LABEL_VERIFY_PROMPT = """You are classifying Chibi sticker emotions from a 2x2 sticker sheet image.
+
+The image contains 4 stickers arranged in a 2x2 grid:
+- Top-left quadrant
+- Top-right quadrant
+- Bottom-left quadrant
+- Bottom-right quadrant
+
+Assign each quadrant the MOST FITTING label from this exact list:
+{labels}
+
+RULES:
+- Each label MUST be used exactly once.
+- Match based on the character's facial expression, gesture, and body language.
+- Do NOT invent new labels. Only use the {count} labels provided above."""
+
+
+def _build_label_verify_schema(candidate_labels: list[str]) -> dict:
+    return {
+        "type": "object",
+        "properties": {
+            "top_left": {"type": "string", "enum": candidate_labels},
+            "top_right": {"type": "string", "enum": candidate_labels},
+            "bottom_left": {"type": "string", "enum": candidate_labels},
+            "bottom_right": {"type": "string", "enum": candidate_labels},
+        },
+        "required": ["top_left", "top_right", "bottom_left", "bottom_right"],
+    }
+
+
+async def verify_sheet_labels(
+    gemini_service: GeminiImageService,
+    sheet_image_path: str,
+    candidate_labels: list[str],
+    task_id: str,
+    sheet_label: str,
+) -> list[str] | None:
+    """Use Flash to verify emotion labels for a 2x2 sticker sheet.
+
+    Returns:
+        Reordered labels in [top_left, top_right, bottom_left, bottom_right] order,
+        or None if verification fails (caller should fallback to positional labels).
+    """
+    try:
+        prompt = _LABEL_VERIFY_PROMPT.format(labels=candidate_labels, count=len(candidate_labels))
+        schema = _build_label_verify_schema(candidate_labels)
+
+        result = await gemini_service.generate_structured_output(
+            prompt=prompt,
+            image_files=[sheet_image_path],
+            model=_REVIEW_MODEL,
+            response_schema=schema,
+        )
+
+        verified = [result.get(k, "") for k in ("top_left", "top_right", "bottom_left", "bottom_right")]
+
+        # Validate: must be a permutation of candidate_labels
+        if sorted(verified) == sorted(candidate_labels) and all(verified):
+            logger.info(
+                "[Pipeline] Task {}: {} label verification: positional={} → verified={}",
+                task_id, sheet_label, candidate_labels, verified,
+            )
+            return verified
+
+        logger.warning(
+            "[Pipeline] Task {}: {} label verification returned invalid permutation: {} (expected one of {}), falling back to positional",
+            task_id, sheet_label, verified, candidate_labels,
+        )
+        return None
+    except Exception as exc:
+        logger.warning(
+            "[Pipeline] Task {}: {} label verification failed: {}, falling back to positional",
+            task_id, sheet_label, exc,
+        )
+        return None
+
 # ---------------------------------------------------------------------------
 # Task tracking
 # ---------------------------------------------------------------------------
@@ -246,6 +323,15 @@ async def _execute_pipeline(task_id: str, image_url: str, callback_url: str) -> 
             work_dir=str(task_dir),
         )
 
+        # Verify emotion labels using Flash (before cutout)
+        emotion_labels = SHEET_EMOTION_LABELS[sheet_index] if sheet_index < len(SHEET_EMOTION_LABELS) else None
+        if emotion_labels:
+            verified_labels = await verify_sheet_labels(
+                gemini_service, sheet_local_path, emotion_labels, task_id, sheet_label,
+            )
+            if verified_labels:
+                emotion_labels = verified_labels
+
         # Step 5: Chroma-key cutout
         cutout_path = task_dir / "cutout" / f"{sheet_label}.webp"
         cutout_path.parent.mkdir(parents=True, exist_ok=True)
@@ -265,7 +351,6 @@ async def _execute_pipeline(task_id: str, image_url: str, callback_url: str) -> 
 
         # Step 6: Smart crop
         smart_crop_dir = task_dir / "smart_crop" / sheet_label
-        emotion_labels = SHEET_EMOTION_LABELS[sheet_index] if sheet_index < len(SHEET_EMOTION_LABELS) else None
         try:
             crop_paths = await asyncio.to_thread(
                 smart_crop_sticker_sheet,
@@ -339,6 +424,39 @@ async def _execute_pipeline(task_id: str, image_url: str, callback_url: str) -> 
         ))
         return
 
+    # ── Step 9: Send success callback ─────────────────────────────────────
+    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
+    await send_callback(callback_url, CallbackPayload(
+        taskId=task_id,
+        errorCode=0,
+        msg="ok",
+        data=CallbackData(emojiList=emoji_list),
+    ))
+
+    # ── Step 9: Send success callback ─────────────────────────────────────
+    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
+    await send_callback(callback_url, CallbackPayload(
+        taskId=task_id,
+        errorCode=0,
+        msg="ok",
+        data=CallbackData(emojiList=emoji_list),
+    ))
+    # ── Step 9: Send success callback ─────────────────────────────────────
+    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
+    await send_callback(callback_url, CallbackPayload(
+        taskId=task_id,
+        errorCode=0,
+        msg="ok",
+        data=CallbackData(emojiList=emoji_list),
+    ))
+    # ── Step 9: Send success callback ─────────────────────────────────────
+    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
+    await send_callback(callback_url, CallbackPayload(
+        taskId=task_id,
+        errorCode=0,
+        msg="ok",
+        data=CallbackData(emojiList=emoji_list),
+    ))
     # ── Step 9: Send success callback ─────────────────────────────────────
     logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
     await send_callback(callback_url, CallbackPayload(
