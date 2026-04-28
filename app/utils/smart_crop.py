@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +253,18 @@ def extract_sticker(
 
     # Paste the sticker onto the canvas
     canvas.paste(sticker_resized, (paste_x, paste_y), sticker_resized)
-    
+
+    # Flatten bottom edge: fill gaps in the scalloped border to create a flat bottom at available_height
+    # This ensures exactly 52px of transparent space below the content
+    alpha = canvas.split()[3]
+    bbox = alpha.getbbox()
+    if bbox and bbox[3] < available_height:
+        draw = ImageDraw.Draw(canvas)
+        draw.rectangle(
+            [bbox[0], bbox[3], bbox[2], available_height],
+            fill=(255, 255, 255, 255),
+        )
+
     return canvas
 
 
