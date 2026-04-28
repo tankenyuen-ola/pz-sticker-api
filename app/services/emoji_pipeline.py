@@ -133,6 +133,12 @@ async def verify_sheet_labels(
             prompt=prompt,
             image_files=[sheet_image_path],
             model=_LABEL_VERIFY_MODEL,
+            response_schema=schema,
+        )
+
+        logger.info(
+            "[Pipeline] Task {}: {} label verification raw result: {}",
+            task_id, sheet_label, result,
         )
 
         verified = [result.get(k, "") for k in ("top_left", "top_right", "bottom_left", "bottom_right")]
@@ -152,8 +158,8 @@ async def verify_sheet_labels(
         return None
     except Exception as exc:
         logger.warning(
-            "[Pipeline] Task {}: {} label verification failed: {}, falling back to positional",
-            task_id, sheet_label, exc,
+            "[Pipeline] Task {}: {} label verification failed: {} (type={}), falling back to positional",
+            task_id, sheet_label, exc, type(exc).__name__,
         )
         return None
 
