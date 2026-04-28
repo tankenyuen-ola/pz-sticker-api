@@ -226,9 +226,12 @@ def extract_sticker(
     available_width = target_size
     available_height = target_size - bottom_margin
 
+    # Bottom padding inside the crop (transparent space below actual content)
+    bottom_padding_in_crop = bottom - (contour.y + contour.height)
+
     scale = min(
         available_width / crop_width,
-        available_height / crop_height,
+        available_height / (crop_height - bottom_padding_in_crop),
     )
 
     new_width = int(crop_width * scale)
@@ -243,9 +246,10 @@ def extract_sticker(
     # Create new transparent canvas
     canvas = Image.new("RGBA", (target_size, target_size), (0, 0, 0, 0))
 
-    # Center horizontally, anchor to bottom of available area (ensures exact 52px bottom margin)
+    # Center horizontally, anchor content bottom to available_height (exact 52px bottom margin)
     paste_x = (target_size - new_width) // 2
-    paste_y = available_height - new_height
+    bottom_padding_scaled = bottom_padding_in_crop * scale
+    paste_y = int(available_height - new_height + bottom_padding_scaled)
 
     # Paste the sticker onto the canvas
     canvas.paste(sticker_resized, (paste_x, paste_y), sticker_resized)
