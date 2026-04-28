@@ -385,6 +385,45 @@ _DEFAULT_SHEETS: Sequence[tuple[str, Sequence[str], str]] = (
 )
 
 
+# Action descriptions for each label (used in label verification prompt)
+LABEL_ACTION_DESCRIPTIONS: dict[str, str] = {
+    # Sheet 1
+    "你好": "Waving a friendly hand with a joyful cute smile",
+    "鼓掌": "Enthusiastically clapping tiny hands with a broad, happy grin",
+    "喜欢": "Making a heart shape with both hands over the chest with a beaming smile",
+    "害羞": "Deep wide pink blush covering cheeks, shyly looking downward, bashful smile, tiny hands hovering nervously near cheeks",
+    # Sheet 2
+    "呜呜呜": "Exaggerated large cartoon waterfall tears weeping down face, sad pouting expression",
+    "生气": "Furrowed brow, crossed tiny arms, cartoon steam exhaling from nostrils or temples",
+    "色咪咪": "Eyes replaced by large red hearts, deep wide pink blush covering cheeks, mouth agape in slack-jawed smile with visible drool droplet hanging from corner. Floating tiny hearts surround head",
+    "要抱抱": "Stretching both tiny arms wide open forward, pleading puppy-dog expression",
+    # Sheet 3
+    "谢谢老板": "Bowing slightly with palms pressed together respectfully and a grateful bright smile",
+    "加油": "Pumping one tiny fist in the air in a determined, encouraging stance with a resolute face",
+    "飞吻": "Blowing a single kiss with one hand on cheek and a playful wink",
+    "晚安": "Resting head on folded hands like a pillow, closed eyes with a peaceful sleeping expression",
+}
+
+
+# Label verification prompt (used by emoji_pipeline.py)
+LABEL_VERIFY_PROMPT = """You are classifying Chibi sticker emotions from a 2x2 sticker sheet image.
+
+The image contains 4 stickers arranged in a 2x2 grid:
+- Top-left quadrant
+- Top-right quadrant
+- Bottom-left quadrant
+- Bottom-right quadrant
+
+Assign each quadrant the MOST FITTING label from this list:
+{label_descriptions}
+
+RULES:
+- Each label MUST be used exactly once.
+- Match based on the character's facial expression, gesture, and body language.
+- Pay close attention to hand gestures and body posture to distinguish similar expressions.
+- Do NOT invent new labels. Only use the {count} labels provided above."""
+
+
 def get_default_sheet_prompts(has_style_image: bool = False) -> List[str]:
     """Return the built-in sticker-sheet prompts as a mutable list.
     

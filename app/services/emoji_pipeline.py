@@ -27,6 +27,8 @@ from app.logger import setup_logger
 from app.prompts.emoji_meme_prompts import (
     DEFAULT_SHEET_PROMPTS,
     EMOJI_MODE_SHEET,
+    LABEL_ACTION_DESCRIPTIONS,
+    LABEL_VERIFY_PROMPT,
     REVIEW_PROMPT,
     REVIEW_RESPONSE_SCHEMA,
     WEBTOON_REFERENCE_PROMPT,
@@ -83,29 +85,14 @@ _ERROR_MESSAGES: dict[int, str] = {
 # Fixed generation parameters for the API
 _GENERATION_MODEL = "gemini-3-pro-image-preview"
 _REVIEW_MODEL = "gemini-2.5-flash"
-_LABEL_VERIFY_MODEL = "gemini-3.0-flash"
+_LABEL_VERIFY_MODEL = "gemini-3-flash-preview"
 _SHEET_ASPECT_RATIO = "1:1"
 _WEBTOON_ASPECT_RATIO = "2:3"
 _RESOLUTION = "1K"
 _TEMPERATURE = 0.6
 _TOP_P = 0.95
 
-# Label verification prompt and schema builder
-_LABEL_VERIFY_PROMPT = """You are classifying Chibi sticker emotions from a 2x2 sticker sheet image.
-
-The image contains 4 stickers arranged in a 2x2 grid:
-- Top-left quadrant
-- Top-right quadrant
-- Bottom-left quadrant
-- Bottom-right quadrant
-
-Assign each quadrant the MOST FITTING label from this exact list:
-{labels}
-
-RULES:
-- Each label MUST be used exactly once.
-- Match based on the character's facial expression, gesture, and body language.
-- Do NOT invent new labels. Only use the {count} labels provided above."""
+# Label verification schema builder
 
 
 def _build_label_verify_schema(candidate_labels: list[str]) -> dict:
@@ -135,7 +122,11 @@ async def verify_sheet_labels(
         or None if verification fails (caller should fallback to positional labels).
     """
     try:
-        prompt = _LABEL_VERIFY_PROMPT.format(labels=candidate_labels, count=len(candidate_labels))
+        label_descriptions = "\n".join(
+            f"- {label}: {LABEL_ACTION_DESCRIPTIONS.get(label, 'unknown')}"
+            for label in candidate_labels
+        )
+        prompt = LABEL_VERIFY_PROMPT.format(label_descriptions=label_descriptions, count=len(candidate_labels))
         schema = _build_label_verify_schema(candidate_labels)
 
         result = await gemini_service.generate_structured_output(
