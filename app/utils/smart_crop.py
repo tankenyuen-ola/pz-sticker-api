@@ -221,31 +221,32 @@ def extract_sticker(
     # Calculate scaling to fit within target size while maintaining aspect ratio
     crop_width = right - left
     crop_height = bottom - top
-    
-    # Leave some margin for the target canvas
-    available_size = int(target_size * 0.85)  # 85% of canvas
-    
+
+    bottom_margin = 52  # Fixed bottom margin in pixels
+    available_width = target_size
+    available_height = target_size - bottom_margin
+
     scale = min(
-        available_size / crop_width,
-        available_size / crop_height
+        available_width / crop_width,
+        available_height / crop_height,
     )
-    
+
     new_width = int(crop_width * scale)
     new_height = int(crop_height * scale)
-    
+
     # Resize the sticker
     sticker_resized = sticker_crop.resize(
         (new_width, new_height),
-        Image.Resampling.LANCZOS
+        Image.Resampling.LANCZOS,
     )
-    
+
     # Create new transparent canvas
     canvas = Image.new("RGBA", (target_size, target_size), (0, 0, 0, 0))
-    
-    # Calculate position to center the sticker
+
+    # Center horizontally, center vertically within available area (top 460px)
     paste_x = (target_size - new_width) // 2
-    paste_y = (target_size - new_height) // 2
-    
+    paste_y = (available_height - new_height) // 2
+
     # Paste the sticker onto the canvas
     canvas.paste(sticker_resized, (paste_x, paste_y), sticker_resized)
     

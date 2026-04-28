@@ -83,6 +83,7 @@ _ERROR_MESSAGES: dict[int, str] = {
 # Fixed generation parameters for the API
 _GENERATION_MODEL = "gemini-3-pro-image-preview"
 _REVIEW_MODEL = "gemini-2.5-flash"
+_LABEL_VERIFY_MODEL = "gemini-3.0-flash"
 _SHEET_ASPECT_RATIO = "1:1"
 _WEBTOON_ASPECT_RATIO = "2:3"
 _RESOLUTION = "1K"
@@ -140,8 +141,7 @@ async def verify_sheet_labels(
         result = await gemini_service.generate_structured_output(
             prompt=prompt,
             image_files=[sheet_image_path],
-            model=_REVIEW_MODEL,
-            response_schema=schema,
+            model=_LABEL_VERIFY_MODEL,
         )
 
         verified = [result.get(k, "") for k in ("top_left", "top_right", "bottom_left", "bottom_right")]
@@ -424,39 +424,6 @@ async def _execute_pipeline(task_id: str, image_url: str, callback_url: str) -> 
         ))
         return
 
-    # ── Step 9: Send success callback ─────────────────────────────────────
-    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
-    await send_callback(callback_url, CallbackPayload(
-        taskId=task_id,
-        errorCode=0,
-        msg="ok",
-        data=CallbackData(emojiList=emoji_list),
-    ))
-
-    # ── Step 9: Send success callback ─────────────────────────────────────
-    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
-    await send_callback(callback_url, CallbackPayload(
-        taskId=task_id,
-        errorCode=0,
-        msg="ok",
-        data=CallbackData(emojiList=emoji_list),
-    ))
-    # ── Step 9: Send success callback ─────────────────────────────────────
-    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
-    await send_callback(callback_url, CallbackPayload(
-        taskId=task_id,
-        errorCode=0,
-        msg="ok",
-        data=CallbackData(emojiList=emoji_list),
-    ))
-    # ── Step 9: Send success callback ─────────────────────────────────────
-    logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
-    await send_callback(callback_url, CallbackPayload(
-        taskId=task_id,
-        errorCode=0,
-        msg="ok",
-        data=CallbackData(emojiList=emoji_list),
-    ))
     # ── Step 9: Send success callback ─────────────────────────────────────
     logger.info("[Pipeline] Task {}: Pipeline complete, {} stickers generated", task_id, len(emoji_list))
     await send_callback(callback_url, CallbackPayload(

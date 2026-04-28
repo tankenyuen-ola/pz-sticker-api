@@ -51,7 +51,7 @@ async def test_sheet(image_path: str, sheet_index: int) -> None:
     result = await service.generate_structured_output(
         prompt=prompt,
         image_files=[image_path],
-        model="gemini-2.5-flash",
+        model="gemini-3.0-flash",
         response_schema=schema,
     )
 
