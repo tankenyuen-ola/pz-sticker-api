@@ -243,9 +243,9 @@ def extract_sticker(
     # Create new transparent canvas
     canvas = Image.new("RGBA", (target_size, target_size), (0, 0, 0, 0))
 
-    # Center horizontally, center vertically within available area (top 460px)
+    # Center horizontally, anchor to bottom of available area (ensures exact 52px bottom margin)
     paste_x = (target_size - new_width) // 2
-    paste_y = (available_height - new_height) // 2
+    paste_y = available_height - new_height
 
     # Paste the sticker onto the canvas
     canvas.paste(sticker_resized, (paste_x, paste_y), sticker_resized)
