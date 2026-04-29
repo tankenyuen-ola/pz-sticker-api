@@ -327,6 +327,17 @@ async def _execute_pipeline(task_id: str, image_url: str, callback_url: str) -> 
                 gemini_service, sheet_local_path, emotion_labels, task_id, sheet_label,
             )
             if verified_labels:
+                if verified_labels != emotion_labels:
+                    positions = ["top-left", "top-right", "bottom-left", "bottom-right"]
+                    diffs = [
+                        f"{positions[pos]}: {old} → {new}"
+                        for pos, (old, new) in enumerate(zip(emotion_labels, verified_labels))
+                        if old != new
+                    ]
+                    logger.warning(
+                        "[Pipeline] Task {}: {} label verification swapped: {}",
+                        task_id, sheet_label, "; ".join(diffs),
+                    )
                 emotion_labels = verified_labels
 
         # Step 5: Chroma-key cutout

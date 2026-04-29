@@ -319,9 +319,14 @@ def smart_crop_sticker_sheet(
             f"Found {len(contours)} contours, using top {expected_stickers} largest"
         )
     
-    # Sort contours by position (top-to-bottom, left-to-right)
-    # This ensures consistent naming: top-left, top-right, bottom-left, bottom-right
-    selected_contours.sort(key=lambda c: (c.y, c.x))
+    # Sort contours by position using row-then-column: split into top/bottom rows
+    # by Y, then sort within each row by X. This is robust against small Y misalignments
+    # between stickers in the same row.
+    sorted_by_y = sorted(selected_contours, key=lambda c: c.y)
+    top_row = sorted(sorted_by_y[:2], key=lambda c: c.x)       # x smaller → left, larger → right
+    bottom_row = sorted(sorted_by_y[2:], key=lambda c: c.x)
+    selected_contours = top_row + bottom_row
+    # Result: [top-left, top-right, bottom-left, bottom-right]
     
     output_paths = []
     base_name = input_path.stem
